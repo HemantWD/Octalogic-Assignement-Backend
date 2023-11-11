@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import db from "./config/db.js";
+import authRoute from "./routes/authRoute.js";
 
 const app = express();
 
@@ -12,6 +13,9 @@ db();
 
 // middelwares
 app.use(express.json());
+
+// routes
+app.use("/api", authRoute);
 
 // REST
 app.get("/", (req, res) => {
