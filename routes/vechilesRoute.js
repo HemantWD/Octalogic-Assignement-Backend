@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  bookVehicle,
   getVehicles,
   vechileType,
   wheelerType,
@@ -14,7 +15,10 @@ router.get("/category", requireSignIn, wheelerType);
 // METHOD: GET || To get the subcategories of vehicles based on the number of wheels (e.g., 2 or 4)
 router.get("/sub-category/:wheeler", requireSignIn, getVehicles);
 
-// METHOF: GET || To get the vechile type
-router.get("/vechiles-list/:type", vechileType);
+// METHOD: GET || To get the vechile type
+router.get("/vechiles-list/:type", requireSignIn, vechileType);
+
+// METHOD: POST || To save the booked vechiles in db
+router.post("/booking", requireSignIn, bookVehicle);
 
 export default router;
