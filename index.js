@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import db from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
+import vechilesRoutes from "./routes/vechilesRoute.js";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // routes
 app.use("/api", authRoute);
+app.use("/vechile", vechilesRoutes);
 
 // REST
 app.get("/", (req, res) => {

@@ -1,4 +1,4 @@
-import mysql from "mysql2";
+import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,8 +11,8 @@ const db = {
   database: process.env.DATABASE,
 };
 
-// Creatinf MySql connection
-const mysqlConnection = mysql.createConnection(db);
+// Creating MySql connection
+const mysqlConnection = await mysql.createConnection(db);
 
 // mysql query
 const createTable = `CREATE TABLE IF NOT EXISTS vechiles (id INT AUTO_INCREMENT PRIMARY KEY, type VARCHAR(255), wheeler INT, brand VARCHAR(255))`;
@@ -35,50 +35,37 @@ const dummyData = [
   { type: "sports", wheeler: 2, brand: "Duati Panigate v4" },
 ];
 
-const seedMySqlDatabase = () => {
-  mysqlConnection.query(createTable, (error) => {
-    if (error) {
-      console.log("Error in creating Table :", error);
-      mysqlConnection.end();
-      return;
-    }
+const seedMySqlDatabase = async () => {
+  try {
+    // Create table
+    await mysqlConnection.execute(createTable);
 
     console.log("MySql database seeded successfully");
 
     const insertQuery =
-      "INSERT INTO vechiles (type,wheeler,brand)VALUES(?,?,?)";
-    let count = 0;
+      "INSERT INTO vechiles (type, wheeler, brand) VALUES (?, ?, ?)";
 
-    const nextData = () => {
-      if (count < dummyData.length) {
-        const myVechile = dummyData[count];
-        mysqlConnection.query(
-          insertQuery,
-          [myVechile.type, myVechile.wheeler, myVechile.brand],
-          (error) => {
-            if (error) {
-              console.log("Error inserting Data");
-            } else {
-              console.log("Data seeded into the Database");
-            }
-            count++;
-            nextData();
-          }
-        );
-      } else {
-        mysqlConnection.end();
-        console.log("Disconnected from MySQL Database");
-      }
-    };
-    nextData();
-  });
+    for (const myVehicle of dummyData) {
+      await mysqlConnection.execute(insertQuery, [
+        myVehicle.type,
+        myVehicle.wheeler,
+        myVehicle.brand,
+      ]);
+      console.log("Data seeded into the Database");
+    }
+
+    console.log("All data seeded successfully");
+  } catch (error) {
+    console.error("Error: ", error);
+  } finally {
+    await mysqlConnection.end();
+    console.log("Disconnected from MySQL Database");
+  }
 };
 
-mysqlConnection.connect((error) => {
-  if (error) {
-    console.log("Error in Connecting to the DB : ", error);
-  } else {
-    console.log("Connected to MYSQL Database");
-    seedMySqlDatabase();
-  }
-});
+try {
+  console.log("Connecting to MySQL Database");
+  await seedMySqlDatabase();
+} catch (error) {
+  console.error("Error in Connecting to the DB : ", error);
+}
